@@ -3,6 +3,7 @@
 # add code below to answer the questions; for each question there should be
 # single print() which will give the answer(s) to that question.
 
+
 # what are the quotient and remainder after (integer) division of 2711274328912 by 23369245575
 print(f"Quotient: {2711274328912//23369245575}, Remainder: {2711274328912%23369245575}")
 
@@ -20,17 +21,17 @@ print(input_string.count('(') - input_string.count(')'))
 # how many elements are in each of the following lists?
 first_list = ['ybk', 'zcg', 'dhw', 'gua', 'mqh', 'yel', 'fpk', 'imk', 'nkt', 'tpl', 'guc', 'ozk', 'dip', 'thn', 'pxc', 'obk', 'orl', 'rdc', 'vto', 'wen', 'tbw', 'itj', 'qfb', 'ymd', 'txb', 'vgw', 'wgd', 'tcg', 'ezm', 'gnt', 'ehf', 'pfo', 'alf']
 second_list = ['ybk', 'zcg', 'dhw', 'gua', 'mqh', 'yel', 'fpk', 'imk', 'nkt', 'tpl', 'guc', 'ozk', 'dip', 'thn', 'pxc', 'obk', 'orl', 'rdc', 'vto', 'wen', 'tbw', 'itj', 'qfb', 'ymd', 'txb', 'vgw', 'wgd', 'tcg', 'ezm', 'gnt', 'ehf', 'pfo', 'alf']
+print(f"There are {len(first_list)} elements in the first and {len(second_list)} elements in the second list") 
 
 
 # which and how many elements are common to the two lists above? 
-if first_list == second_list:#edge case handling to increase best case performance
-    print(f"Common elements are: {first_list}")
-    print(f"There are {len(first_list)} common elements")
+first_list_as_set = set(first_list)
+second_list_as_set = set(second_list)
+set_union = first_list_as_set.union(second_list_as_set)
+print(f"Common elements are: {set_union}. There are {len(set_union)} common elements")
 
 
 # how often does the character 'a' occur in each of the lists above?
 first_str = "".join(first_list)
 second_str = "".join(second_list)
-
-print(f"There are {first_str.count('a')} a's in the first list")
-print(f"There are {second_str.count('a')} a's in the second list")
+print(f"There are {first_str.count('a')} a's in the first list and {second_str.count('a')} a's in the second list")
