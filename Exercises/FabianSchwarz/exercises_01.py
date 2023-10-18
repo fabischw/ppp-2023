@@ -27,8 +27,8 @@ print(f"There are {len(first_list)} elements in the first and {len(second_list)}
 # which and how many elements are common to the two lists above? 
 first_list_as_set = set(first_list)
 second_list_as_set = set(second_list)
-set_union = first_list_as_set.union(second_list_as_set)
-print(f"Common elements are: {set_union}. There are {len(set_union)} common elements")
+set_intersection = first_list_as_set.intersection(second_list_as_set)
+print(f"Common elements are: {set_intersection}. There are {len(set_intersection)} common elements")
 
 
 # how often does the character 'a' occur in each of the lists above?
