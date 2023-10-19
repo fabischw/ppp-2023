@@ -34,6 +34,8 @@ def computer(commands):
     """
     Computer - Function
     takes a list of integeres as input and simulates a virtual computer
+    Input: array of integers
+    Returns: integer at commands[0] after running the 'code'
     """
     
     running = True
@@ -74,7 +76,7 @@ def computer(commands):
             
             
     
-    print(commands[0])
+    return(commands[0])
 
 
 
@@ -92,8 +94,10 @@ def computer(commands):
 
 def task2(*args):
     """
-    Task2
-
+    Input: arbitrary number of unnamed arguments (all strings)
+    Returns: Tuple:
+    - array 1 contains all arguments which can be interpreted as a number
+    - array 2 contains all strings which contain just one character
     """
     numbers = []
     chars = []
@@ -101,7 +105,7 @@ def task2(*args):
     for elements in args:
         if len(elements) == 1:#Appending strings with length 1 to the chars array
             chars.append(elements)
-        if elements != "nan":#handle nan string as "Not a number" - is not a number
+        if elements != "nan":#make 'nan' string be not interpreted as a number
             try:
                 test_number = complex(elements)# Test if current string is convertable to a complex which should include ALL numbers
                 numbers.append(elements)
@@ -112,4 +116,4 @@ def task2(*args):
     return numbers, chars
 
 
-# Unittests for task 2 can be found in ./tests/test_exercises_02.py
+# Tests for task 2 can be found in ./tests/test_exercises_02.py
