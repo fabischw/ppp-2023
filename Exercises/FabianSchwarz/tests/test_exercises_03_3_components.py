@@ -42,7 +42,19 @@ class task_3_component_test(unittest.TestCase):
         """Test the calculate_current_digit_params function
         
         """
-        pass
+        #test initial calculation
+        inpt1 = 123445
+        known_digit_count1 = None
+        response1_expected = (6,876554)
+        response1_actual = exercise3.calculate_current_digit_params(inpt_num=inpt1, known_digit_count=known_digit_count1)
+        self.assertTupleEqual(response1_expected,response1_actual)
+
+        #test calculation with known data
+        inpt2 = None
+        known_digit_count2 = 6
+        response2_expected = (7,8999999)
+        response2_actual = exercise3.calculate_current_digit_params(inpt_num=inpt2, known_digit_count=known_digit_count2)
+        self.assertTupleEqual(response2_expected,response2_actual)
 
 
 
@@ -70,7 +82,33 @@ class task_3_component_test(unittest.TestCase):
         """Test the contains_adjacent_double function
         
         """
-        pass
+        #check double at beginning
+        inpt1_digit_tuple = (4,4,3,2,1)
+        inpt1_digit_count = len(inpt1_digit_tuple)
+        response1_expected = 0
+        response1_actual = exercise3.contains_adjacent_double(inpt1_digit_count, inpt1_digit_tuple)
+        self.assertEqual(response1_expected,response1_actual)
+
+        #check no double
+        inpt2_digit_tuple = (4,3,2,1)
+        inpt2_digit_count = len(inpt2_digit_tuple)
+        response2_expected = None
+        response2_actual = exercise3.contains_adjacent_double(inpt2_digit_count, inpt2_digit_tuple)
+        self.assertEqual(response2_expected,response2_actual)
+
+        #check double near end
+        inpt3_digit_tuple = (4,3,2,1,1)
+        inpt3_digit_count = len(inpt3_digit_tuple)
+        response3_expected = 3
+        response3_actual = exercise3.contains_adjacent_double(inpt3_digit_count, inpt3_digit_tuple)
+        self.assertEqual(response3_expected,response3_actual)
+
+        #check duplicate doubles
+        inpt4_digit_tuple = (9,9,8,6,6,4)
+        inpt4_digit_count = len(inpt4_digit_tuple)
+        response4_expected = 3
+        response4_actual = exercise3.contains_adjacent_double(inpt4_digit_count, inpt4_digit_tuple)
+        self.assertEqual(response4_expected,response4_actual)
 
 
 

@@ -27,7 +27,7 @@ class Card:
     def __repr__(self) -> str:
         return f"Card({self.suit}, {self.type})"
     
-    def __str__(self) -> str:
+    def __str__(self) -> str:#string representation
         return f"{self.type} of {self.suit}"
 
 
@@ -46,7 +46,7 @@ class CardDeck:
     def __iter__(self):
         return (elements for elements in self.__class__.cards)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:#string representation
         return_str = ""
         for elements in self.__class__.cards:
             return_str += str(elements) + ", "
@@ -114,23 +114,61 @@ class SkatDeck(CardDeck):
 
 
 
+
 class card_game_test(unittest.TestCase):
     """
     Test class for the card games
     """
 
+    def test_Card_object(self):
+        TestCard = Card(suit="diamonds",type="ace")#create Test Card
+        #test string representation
+        test_str_representation_expected = "ace of diamonds"
+        test_str_representation_actual = str(TestCard)
+        self.assertEqual(test_str_representation_expected,test_str_representation_actual)
+
+        #test attribtes (assert they are public)
+        test_attr_type_public_expected = "ace"
+        test_attr_type_public_actual = TestCard.type
+        self.assertEqual(test_attr_type_public_expected,test_attr_type_public_actual)
 
 
     def test_indexing(self):
-        pass
+        TestFrenchCardDeck = FrenchCardDeck()
+        TestSkatDeck = SkatDeck()
+
+        ExampleCardFrench = TestFrenchCardDeck[0]
+        ExampleCardSkat = TestSkatDeck[0]
+        self.assertIsInstance(ExampleCardFrench,Card)
+        self.assertIsInstance(ExampleCardSkat,Card)
+
 
     def test_iterating(self):
-        pass
+        TestFrenchCardDeck = FrenchCardDeck()
+        TestSkatDeck = SkatDeck()
+
+        for cards in TestFrenchCardDeck:#test iterating through the FrenchCardDeck
+            self.assertIsInstance(cards, Card)
+            self.assertIsInstance(str(cards), str)
+
+        for cards in TestSkatDeck:#test iteratin through the SkatDeck
+            self.assertIsInstance(cards, Card)
+            self.assertIsInstance(str(cards), str)
 
     def test_str_representation(self):
-        pass
+        TestFrenchCardDeck = FrenchCardDeck()
+        TestSkatDeck = SkatDeck()
+        #FrenchDeck representation as string
+        FrenchDeck_str_expected = "2 of diamonds, 3 of diamonds, 4 of diamonds, 5 of diamonds, 6 of diamonds, 7 of diamonds, 8 of diamonds, 9 of diamonds, jack of diamonds, queen of diamonds, king of diamonds, ace of diamonds, 2 of hearts, 3 of hearts, 4 of hearts, 5 of hearts, 6 of hearts, 7 of hearts, 8 of hearts, 9 of hearts, jack of hearts, queen of hearts, king of hearts, ace of hearts, 2 of spades, 3 of spades, 4 of spades, 5 of spades, 6 of spades, 7 of spades, 8 of spades, 9 of spades, jack of spades, queen of spades, king of spades, ace of spades, 2 of clubs, 3 of clubs, 4 of clubs, 5 of clubs, 6 of clubs, 7 of clubs, 8 of clubs, 9 of clubs, jack of clubs, queen of clubs, king of clubs, ace of clubs"
+        FrenchDeck_str_actual = str(TestFrenchCardDeck)
+        self.assertEqual(FrenchDeck_str_expected,FrenchDeck_str_actual)
+        
+        #SkatDeck representation as string
+        SkatDeck_str_expected = "7 of diamonds, 8 of diamonds, 9 of diamonds, jack of diamonds, queen of diamonds, king of diamonds, ace of diamonds, 7 of hearts, 8 of hearts, 9 of hearts, jack of hearts, queen of hearts, king of hearts, ace of hearts, 7 of spades, 8 of spades, 9 of spades, jack of spades, queen of spades, king of spades, ace of spades, 7 of clubs, 8 of clubs, 9 of clubs, jack of clubs, queen of clubs, king of clubs, ace of clubs"
+        SkatDeck_str_actual = str(TestSkatDeck)
+        self.assertEqual(SkatDeck_str_expected,SkatDeck_str_actual)
 
-    
+
 
 # PART 3:
 # write a function that accepts two numbers, a lower bound and an upper bound.
@@ -192,7 +230,7 @@ def calculate_current_digit_params(inpt_num:int, known_digit_count=None) -> int:
     if known_digit_count:
         pass
 
-        return digit_count+1, 10**(known_digit_count+1) - 10**known_digit_count - 1
+        return known_digit_count+1, 10**(known_digit_count+1) - 10**known_digit_count - 1
 
     else:
         digit_count = int(math.log10(inpt_num)+1)#get current digit count
@@ -309,16 +347,18 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
     runs_left_to_digit_increase = starting_digit_params[1]
     run_present = False
 
+
     i = lower_bound
     while i < upper_bound:
         iterator_digits_tuple = tuple(split_digits(i))
         iterator_digits_set = set(iterator_digits_tuple)
         iterator_unique_digit_count = len(iterator_digits_set)#unique digit count
         #only continue if there's less unique digits then total digits -> at least one element exists twice
+        #print(i)
         if iterator_unique_digit_count < current_digit_count:
             if is_in_order(iterator_digits_set):#continue searching if in order
                 adjacent_digit = contains_adjacent_double(current_digit_count,iterator_digits_tuple)
-                if adjacent_digit:
+                if adjacent_digit != None:
                     hit_count += 1
             else:# don't continue searching if not in order, instead find runs
                 pass
@@ -334,9 +374,9 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
         i += 1
 
         if runs_left_to_digit_increase == 0:#check whether a re-calculation of the digit count is needed
-            new_digit_params = calculate_current_digit_params(lower_bound)
+            new_digit_params = calculate_current_digit_params(i, current_digit_count)
             current_digit_count = new_digit_params[0]
-            runs_left_to_digit_increase[1]
+            runs_left_to_digit_increase = new_digit_params[1]
 
     return hit_count
 
@@ -344,13 +384,23 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
 
 
 
-print(double_finder(lower_bound=134564,upper_bound=585159))
 
 
+
+class double_finder_test(unittest.TestCase):
+
+    def test_response_given(self):
+        """Test with given upper and lower bound
+        """
+        lower_bound = 134564
+        upper_bound = 585159
+        response_expected = 1306
+        response_actual = double_finder(lower_bound=lower_bound,upper_bound=upper_bound)
+        self.assertEqual(response_expected, response_actual)
 
 
 """
 if __name__ == '__main__':#unittest test runner
     unittest.main()
-
 """
+
