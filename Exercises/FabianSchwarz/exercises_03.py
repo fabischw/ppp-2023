@@ -210,117 +210,6 @@ def split_digits(n:int, base=10):
         yield d
 
 
-def calculate_current_digit_params(inpt_num:int, known_digit_count=None) -> int:
-    """calculate the current digit count and difference between biggest possible number with that many digits
-    Parameters:
-    --------------
-    inpt_num(int):                      input number
-
-    Return Values:
-    --------------
-    Tuple of:
-    digit_count(int):                   Digit count
-    int:                                10**digit_count - inpt_num - 1 - nums of iterations until the digit_count increases
-
-
-    function to determine how many digits the number has and how many steps until the count increases
-    - inpt_num: Input Number
-    - known_digit_count: used if the present digit count is already known
-    """
-    if known_digit_count:
-        pass
-
-        return known_digit_count+1, 10**(known_digit_count+1) - 10**known_digit_count - 1
-
-    else:
-        digit_count = int(math.log10(inpt_num)+1)#get current digit count
-
-        return digit_count, 10**digit_count - inpt_num - 1#return amount of iterations before digit count has to be re-checked
-
-
-def is_in_order(inpt:tuple) -> bool:
-    """determine if a tuple is in descending order
-
-    Parameters:
-    --------------
-    inpt(tuple):                        input tuple
-
-    Return Values:
-    --------------
-    bool:                               True if the tuple is descending order
-    """
-    prev_element = 9#setting to 9 to not interfere with the logic
-    for elements in inpt:
-        if elements > prev_element:
-            return False
-        else:
-            prev_element = elements
-    return True
-
-
-def determine_runs(current_num:int, current_num_digit_tuple:tuple, valid:bool, double_appearance=None):
-    #TODO: implemented run calculation
-    """calculate skippable numbers
-    Function that calculates `runs` in the task, enabling skipping iterations
-
-    Parameters:
-    --------------
-    current_num(int):                   current number 
-    current_num_digit_tuple(tuple):     tuple of digits of current number, inverted
-    valid(bool):                        determines whether the function is looking for runs of valid or invalid numbers
-
-    Return Values:
-    --------------
-    skip_count(int):                    how many iterations to skip
-
-    NOTES:
-    --------------
-    for invalid:
-    1. find 'problem' in data -> loop trough array until point is found at which the order is broken
-    2. calculate how many runs are left until the 'problem' dissapears
-
-    for valid:
-    1. get first valid double in inverted list
-    """
-    skip_count = None#placeholder
-
-    return skip_count
-
-
-
-def contains_adjacent_double(digit_count:int, digit_tuple:tuple) -> int:
-    """check whether there is at least one `double`
-
-    Parameters:
-    --------------
-    digit_count(int):                   the count of digits currently used
-    digit_tuple(tuple):                 Tuple of the number to analyze (order inverted!)
-
-    Return Values:
-    --------------
-    if there is a double:
-    int:                                position of the firts element of the double in the tuple
-    if there is no double:
-    None
-    
-    """
-    prev_element = digit_tuple[digit_count-1]
-    digit_counter = 0#count how often a digit has appeared
-    for i in range(1, digit_count+2):
-        curr_element = digit_tuple[digit_count-i]
-        if curr_element == prev_element:#loop from right to left, check if double is present
-            digit_counter += 1
-        else:
-            if digit_counter == 2:#double found
-                return digit_count-2-(i-3)#return index of first appearence of a double in inverted tuple
-            digit_counter = 1
-        prev_element = curr_element
-    return None#return None if there was no adjacent double found
-
-
-
-
-
 
 def double_finder(lower_bound:int, upper_bound:int) -> int:
     """Solution for Exercise 3
@@ -342,44 +231,58 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
 
     hit_count = 0
     skip_count = 0#Debug information, counts how many numbers have been skipped
-    starting_digit_params = calculate_current_digit_params(lower_bound)
-    current_digit_count = starting_digit_params[0]
-    runs_left_to_digit_increase = starting_digit_params[1]
-    run_present = False
+
 
 
     i = lower_bound
     while i < upper_bound:
-        iterator_digits_tuple = tuple(split_digits(i))
-        iterator_digits_set = set(iterator_digits_tuple)
-        iterator_unique_digit_count = len(iterator_digits_set)#unique digit count
-        #only continue if there's less unique digits then total digits -> at least one element exists twice
-        #print(i)
-        if iterator_unique_digit_count < current_digit_count:
-            if is_in_order(iterator_digits_set):#continue searching if in order
-                adjacent_digit = contains_adjacent_double(current_digit_count,iterator_digits_tuple)
-                if adjacent_digit != None:
-                    hit_count += 1
-            else:# don't continue searching if not in order, instead find runs
-                pass
-                """#TODO: uncomment code once run calculation is finished
-                skips = determine_runs(current_num=i, current_num_digit_tuple=iterator_digits_tuple, valid=False)#determine amounts of skips
-                i += skips
-                skip_count += skips
-                """
+        digit_tuple = tuple(split_digits(i))
 
+        elem_counter = 1
+        ordered = True
+        adj_elements = False
+        for idx,elements in enumerate(digit_tuple):
+            if idx == 0:
+                continue
+            if elements > digit_tuple[idx-1]:
+                ordered = False
+                #calculate skips
+                curr_skips = 0
+                for j in range(0,idx+1):
+                    if digit_tuple[j] < elements:
+                        curr_skips += elements - digit_tuple[j]
+                #print(f"i: {i}, skips: {curr_skips}, new_i: {i+curr_skips}")#Debug statement
+                if curr_skips > 0:
+                    i += curr_skips - 1
+                    skip_count += curr_skips - 1
+                if i >= upper_bound:
+                    return hit_count
+                break
+            elif elements == digit_tuple[idx-1]:
+                elem_counter += 1
+            else:
+                if elem_counter == 2:
+                    adj_elements = True
+                elem_counter = 1
+        if elem_counter == 2:
+            adj_elements = True
 
+        if ordered and adj_elements:
+            hit_count += 1
 
-        runs_left_to_digit_increase -= 1
         i += 1
-
-        if runs_left_to_digit_increase == 0:#check whether a re-calculation of the digit count is needed
-            new_digit_params = calculate_current_digit_params(i, current_digit_count)
-            current_digit_count = new_digit_params[0]
-            runs_left_to_digit_increase = new_digit_params[1]
-
+    print(f"{skip_count} Skips have been performed")
     return hit_count
 
+
+
+
+"""
+from timeit import timeit
+print(double_finder(134564, 585159))
+
+print(timeit(lambda: double_finder(134564, 585159), number=10)/10)# on average: 0.25s on personal hardware
+"""
 
 
 
@@ -399,8 +302,8 @@ class double_finder_test(unittest.TestCase):
         self.assertEqual(response_expected, response_actual)
 
 
-"""
+
 if __name__ == '__main__':#unittest test runner
     unittest.main()
-"""
+
 
