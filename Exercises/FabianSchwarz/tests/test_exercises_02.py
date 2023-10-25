@@ -42,10 +42,7 @@ class task_2_test(unittest.TestCase):
         inpt = ["a","7","gh","fs","f","dlr","1","0"]
         response_expected = (['7', '1', '0'], ['a', '7', 'f', '1', '0'])
         response = self.run_test(inpt)
-        try:#test both orders of the tuple
-            self.assertTupleEqual(response,response_expected)
-        except:
-            self.assertTupleEqual(response, response_expected[::-1])
+        self.assertTupleEqual(response,response_expected)
 
 
     def test_floats(self):
@@ -56,10 +53,7 @@ class task_2_test(unittest.TestCase):
         inpt = ["a","5.6","6.2323","7","2.0"]
         response_expected = (['5.6', '6.2323', '7', '2.0'], ['a', '7'])
         response = self.run_test(inpt)
-        try:#test both orders of the tuple
-            self.assertTupleEqual(response,response_expected)
-        except:
-            self.assertTupleEqual(response, response_expected[::-1])
+        self.assertTupleEqual(response,response_expected)
 
 
     def test_nan(self):
@@ -70,10 +64,7 @@ class task_2_test(unittest.TestCase):
         inpt = ["nan"]
         response_expected = ([], [])
         response = self.run_test(inpt)
-        try:#test both orders of the tuple
-            self.assertTupleEqual(response,response_expected)
-        except:
-            self.assertTupleEqual(response, response_expected[::-1])
+        self.assertTupleEqual(response,response_expected)
 
 
     def test_infinity(self):
@@ -84,10 +75,7 @@ class task_2_test(unittest.TestCase):
         inpt = ["infinity","-infinity","+infinity"]
         response_expected = (['infinity', '-infinity', '+infinity'], [])
         response = self.run_test(inpt)
-        try:#test both orders of the tuple
-            self.assertTupleEqual(response,response_expected)
-        except:
-            self.assertTupleEqual(response, response_expected[::-1])
+        self.assertTupleEqual(response,response_expected)
 
 
     def test_complex(self):
@@ -98,10 +86,7 @@ class task_2_test(unittest.TestCase):
         inpt = ["5+3j","1+1j","0+1j","1+0j","j"]
         response_expected = (['5+3j', '1+1j', '0+1j', '1+0j', 'j'], ['j'])
         response = self.run_test(inpt)
-        try:#test both orders of the tuple
-            self.assertTupleEqual(response, response_expected)
-        except:
-            self.assertTupleEqual(response, response_expected[::-1])
+        self.assertTupleEqual(response, response_expected)
 
 
 

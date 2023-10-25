@@ -51,20 +51,13 @@ def computer(commands):
                 target_idx = commands[current_index+3]
                 #print(f"Current Index: {current_index}, current command: {commands[current_index]}, current data: A:{a}, B:{b}") # Debug Info
                 
-                try:
-                    if commands[current_index] == 1:
-                        commands[target_idx] = a + b
-                    elif commands[current_index] == 2:
-                        commands[target_idx] = a * b
-                        
+                if commands[current_index] == 1:
+                    commands[target_idx] = a + b
+                elif commands[current_index] == 2:
+                    commands[target_idx] = a * b
                     
-                except IndexError:
-                #Exception Handling for index out of range
-                    print("The computer ran into a problem processing your program: Index out of range")
-                    running = False
                     
-                finally:
-                    current_index += 4
+                current_index += 4
                 
             
             except IndexError:
