@@ -189,28 +189,6 @@ class card_game_test(unittest.TestCase):
 
 
 
-def split_digits(n:int, base=10):
-    """Generator to split number into digits
-
-    Parameters:
-    --------------
-    n(int):                             integer to split into digits
-    base(int)=10                        base to split integer to
-
-    Return Values:
-    --------------
-    function:                           function to split ints into digits
-
-    #! the digits this returns are in descending order !
-    """
-    if n == 0:
-        yield 0
-    while n:
-        n, d = divmod(n, base)
-        yield d
-
-
-
 def double_finder(lower_bound:int, upper_bound:int) -> int:
     """Solution for Exercise 3
 
@@ -227,66 +205,79 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
     - there is at least one group of exactly two adjacent digits within the number which are the same (like 33 in 123345)
     - digits only increase going from left to right
 
+    Code Optimizations to reach high efficiency:
+    minor improvments:
+    1. Avoiding strings and using array / tuple(previously) of ints instead
+    2. converting the current number to the array via bytes and ascii
+    3. Skip follow-up valid numbers (Example: 123345 - skips: 123346, 123347, 123348, 123349)
+
+    major improvments (responsible for O(logn) complexity):
+    Skip invalid numbers:
+
+
     """
 
-    hit_count = 0
-    skip_count = 0#Debug information, counts how many numbers have been skipped
 
-
+    hit_count = 0#count valid numbers (='hits')
+    skip_count = 0#DEBUG: counts how many numbers have been skipped
+    iskip_count = 0#DEBUG: count individual skips
+    pos_skip_count = 0#DEBUG: positive skip count
+    pos_iskip_count = 0#DEBUG: positive individual skip count
 
     i = lower_bound
     while i < upper_bound:
-        digit_tuple = tuple(split_digits(i))
+        ascii0 = b'0'[0]
+        digit_tuple = [d-ascii0 for d in b'%d'%i]#split digits into a array
+        digit_len = len(digit_tuple)#length of current number
+        adj_pos = digit_len#adjecent digit position -> required for positive skip calculation
 
-        elem_counter = 1
-        ordered = True
-        adj_elements = False
-        for idx,elements in enumerate(digit_tuple):
-            if idx == 0:
-                continue
-            if elements > digit_tuple[idx-1]:
+        elem_counter = 1#element counter
+        ordered = True#set ordered as True
+        adj_elements = False#set adjacent values as False
+        for idx,elements in enumerate(digit_tuple):#enumerate over the digits
+            if idx == 0: continue#go to next iteration if looking at the first value
+            if  elements < digit_tuple[idx-1]:#check if list is in order
                 ordered = False
                 #calculate skips
                 curr_skips = 0
-                for j in range(0,idx+1):
-                    if digit_tuple[j] < elements:
-                        curr_skips += elements - digit_tuple[j]
-                #print(f"i: {i}, skips: {curr_skips}, new_i: {i+curr_skips}")#Debug statement
-                if curr_skips > 0:
-                    i += curr_skips - 1
-                    skip_count += curr_skips - 1
-                if i >= upper_bound:
-                    return hit_count
-                break
-            elif elements == digit_tuple[idx-1]:
+                for j in range(idx-1,digit_len):#loop from previous index to end of list
+                    if digit_tuple[j] < digit_tuple[idx-1]:
+                        curr_skips += (digit_tuple[idx-1] - digit_tuple[j])*10**((digit_len)- j -1)
+                print(f"NSkip found - i: {i}, stopped at: {elements}[{idx}], digits read as: {digit_tuple} ,skips: {curr_skips}, new_i: {i+curr_skips}")#Debug statement
+                i += curr_skips - 1
+                skip_count += curr_skips - 1#Debug info
+                iskip_count += 1#Debug info
+            elif elements == digit_tuple[idx-1]:#check if digit is same as previous digit
                 elem_counter += 1
             else:
-                if elem_counter == 2:
+                if elem_counter == 2:#found single adjacent double (because current value differs from previous)
                     adj_elements = True
+                    adj_pos = idx
                 elem_counter = 1
         if elem_counter == 2:
             adj_elements = True
-
-        if ordered and adj_elements:
+        
+        if ordered and adj_elements:#found adjacent double
             hit_count += 1
+            if digit_tuple[digit_len-1] < 9 and adj_pos < digit_len -2:#only calculate skips if the double was not found near end
+                pos_skips = 9 - digit_tuple[digit_len-1]#calculate 'positive' skips -> how many numbers are certainly valid
+                print(f"\tPSkip found - i: {i}, stopped at: {elements}[{idx}], digits read as: {digit_tuple} ,skips: {pos_skips}, new_i: {i+pos_skips}")#Debug statement (one tab to be easier to read)
+                i += pos_skips
+                hit_count += pos_skips
+                pos_skip_count += pos_skips#Debug info
+                pos_iskip_count+= 1#Debug info
 
         i += 1
-    print(f"{skip_count} Skips have been performed")
+    print(f"Skip_count: {skip_count}; iskips: {iskip_count}; average iskip-width: {round(skip_count/iskip_count,2)}| pos_skips: {pos_skip_count}; pos_iskips: {pos_iskip_count}; average iskip width: {round(pos_skip_count/pos_iskip_count,2)}")
     return hit_count
 
 
 
 
-"""
 from timeit import timeit
-print(double_finder(134564, 585159))
+#print(double_finder(134564, 585159))
 
-print(timeit(lambda: double_finder(134564, 585159), number=10)/10)# on average: 0.25s on personal hardware
-"""
-
-
-
-
+#print(timeit(lambda: double_finder(134564, 585159), number=1000)/1000)# on average: 0.005s on personal hardware, time complexity: O(log(n)) and space: O(k) (n: range of numbers, k: digit length) 
 
 
 
