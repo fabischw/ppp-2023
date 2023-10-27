@@ -20,15 +20,15 @@ class Card:
     self.suits(str):                    the Card's suite
     self.type(str):                     Card type
     """
-    def __init__(self, suit:str, type:str):
+    def __init__(self, suit:str, card_type:str):
         self.suit = suit#define Card suits (hearts, spades etc.)
-        self.type = type#define Card value (2,7,king, ace)
+        self.card_type = card_type#define Card value (2,7,king, ace)
 
     def __repr__(self) -> str:
-        return f"Card({self.suit}, {self.type})"
+        return f"Card({self.suit}, {self.card_type})"
     
     def __str__(self) -> str:#string representation
-        return f"{self.type} of {self.suit}"
+        return f"{self.card_type} of {self.suit}"
 
 
 
@@ -41,25 +41,21 @@ class CardDeck:
     self.cards(list):                   list of Card objects
     """
     def __init__(self, cards:list):
-        self.__class__.cards = cards
+        self.cards = cards
 
     def __iter__(self):
-        return (elements for elements in self.__class__.cards)
+        return (elements for elements in self.cards)
 
     def __str__(self) -> str:#string representation
-        return_str = ""
-        for elements in self.__class__.cards:
-            return_str += str(elements) + ", "
-
-        return return_str[:-2]
+        return ", ".join([str(card) for card in self.cards])
 
 
     def __repr__(self) -> str:
-        return f"CardDeck({self.__class__.cards})"
+        return f"CardDeck({self.cards})"
 
     def __getitem__(self,index: int):
-        if 0 <= index < len(self.__class__.cards):
-            return self.__class__.cards[index]
+        if 0 <= index < len(self.cards):
+            return self.cards[index]
         else:
             raise IndexError(f"Index out of range ({index})")
 
@@ -81,7 +77,7 @@ class FrenchCardDeck(CardDeck):
         card_types = ["2","3","4","5","6","7","8","9","jack","queen","king","ace"]
         for suits in card_suits:
             for types in card_types:
-                cards.append(Card(suit=suits, type=types))
+                cards.append(Card(suit=suits, card_type=types))
 
         super().__init__(cards=cards)
 
@@ -103,7 +99,7 @@ class SkatDeck(CardDeck):
         card_types = ["7","8","9","jack","queen","king","ace"]
         for suits in card_suits:
             for types in card_types:
-                cards.append(Card(suit=suits, type=types))
+                cards.append(Card(suit=suits, card_type=types))
 
         super().__init__(cards=cards)
 
@@ -121,15 +117,15 @@ class card_game_test(unittest.TestCase):
     """
 
     def test_Card_object(self):
-        TestCard = Card(suit="diamonds",type="ace")#create Test Card
+        TestCard = Card(suit="diamonds",card_type="ace")#create Test Card
         #test string representation
         test_str_representation_expected = "ace of diamonds"
         test_str_representation_actual = str(TestCard)
         self.assertEqual(test_str_representation_expected,test_str_representation_actual)
 
-        #test attribtes (assert they are public)
+        #test attributes (assert they are public)
         test_attr_type_public_expected = "ace"
-        test_attr_type_public_actual = TestCard.type
+        test_attr_type_public_actual = TestCard.card_type
         self.assertEqual(test_attr_type_public_expected,test_attr_type_public_actual)
 
 
@@ -151,7 +147,7 @@ class card_game_test(unittest.TestCase):
             self.assertIsInstance(cards, Card)
             self.assertIsInstance(str(cards), str)
 
-        for cards in TestSkatDeck:#test iteratin through the SkatDeck
+        for cards in TestSkatDeck:#test iterating through the SkatDeck
             self.assertIsInstance(cards, Card)
             self.assertIsInstance(str(cards), str)
 
@@ -212,9 +208,11 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
     3. Skip follow-up valid numbers (Example: 123345 - skips: 123346, 123347, 123348, 123349)
 
     major improvments (responsible for O(logn) complexity):
-    Skip invalid numbers:
+    Skip invalid numbers: Skips numbers that are certainly invalid.
+    Example: i = 123934 - is invalid because out of order (possibly more causes)
+    - will stay invalid up to at least 12399, hence, numbers from 1239934 up to 12399 do not have to be checked -> 65 numbers will be skipped
 
-
+    If you are interested in what exactly happens in the code, consider un-commenting lines 244, 262, 269 to see debugging information
     """
 
 
@@ -229,7 +227,7 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
         ascii0 = b'0'[0]
         digit_tuple = [d-ascii0 for d in b'%d'%i]#split digits into a array
         digit_len = len(digit_tuple)#length of current number
-        adj_pos = digit_len#adjecent digit position -> required for positive skip calculation
+        adj_pos = digit_len#adjacent digit position -> required for positive skip calculation
 
         elem_counter = 1#element counter
         ordered = True#set ordered as True
@@ -243,7 +241,7 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
                 for j in range(idx-1,digit_len):#loop from previous index to end of list
                     if digit_tuple[j] < digit_tuple[idx-1]:
                         curr_skips += (digit_tuple[idx-1] - digit_tuple[j])*10**((digit_len)- j -1)
-                print(f"NSkip found - i: {i}, stopped at: {elements}[{idx}], digits read as: {digit_tuple} ,skips: {curr_skips}, new_i: {i+curr_skips}")#Debug statement
+                #print(f"NSkip found - i: {i}, stopped at: {elements}[{idx}], digits read as: {digit_tuple} ,skips: {curr_skips}, new_i: {i+curr_skips}")#Debug statement
                 i += curr_skips - 1
                 skip_count += curr_skips - 1#Debug info
                 iskip_count += 1#Debug info
@@ -261,14 +259,14 @@ def double_finder(lower_bound:int, upper_bound:int) -> int:
             hit_count += 1
             if digit_tuple[digit_len-1] < 9 and adj_pos < digit_len -2:#only calculate skips if the double was not found near end
                 pos_skips = 9 - digit_tuple[digit_len-1]#calculate 'positive' skips -> how many numbers are certainly valid
-                print(f"\tPSkip found - i: {i}, stopped at: {elements}[{idx}], digits read as: {digit_tuple} ,skips: {pos_skips}, new_i: {i+pos_skips}")#Debug statement (one tab to be easier to read)
+                #print(f"\tPSkip found - i: {i}, stopped at: {elements}[{idx}], digits read as: {digit_tuple} ,skips: {pos_skips}, new_i: {i+pos_skips}")#Debug statement (one tab to be easier to read)
                 i += pos_skips
                 hit_count += pos_skips
                 pos_skip_count += pos_skips#Debug info
                 pos_iskip_count+= 1#Debug info
 
         i += 1
-    print(f"Skip_count: {skip_count}; iskips: {iskip_count}; average iskip-width: {round(skip_count/iskip_count,2)}| pos_skips: {pos_skip_count}; pos_iskips: {pos_iskip_count}; average iskip width: {round(pos_skip_count/pos_iskip_count,2)}")
+    #print(f"Skip_count: {skip_count}; iskips: {iskip_count}; average iskip-width: {round(skip_count/iskip_count,2)}| pos_skips: {pos_skip_count}; pos_iskips: {pos_iskip_count}; average iskip width: {round(pos_skip_count/pos_iskip_count,2)}")
     return hit_count
 
 
@@ -284,13 +282,16 @@ from timeit import timeit
 class double_finder_test(unittest.TestCase):
 
     def test_response_given(self):
-        """Test with given upper and lower bound
-        """
         lower_bound = 134564
         upper_bound = 585159
         response_expected = 1306
         response_actual = double_finder(lower_bound=lower_bound,upper_bound=upper_bound)
         self.assertEqual(response_expected, response_actual)
+
+    def test_performance_regular_data(self):
+        avg_time = timeit(lambda: double_finder(134564, 585159), number=50)/50
+        self.assertTrue(avg_time < 1)#assume the script should be faster than 1 second on any hardware(on my hardware: 0.005s)
+        print(f"average time Task 3: {round(avg_time,5)}")
 
 
 
