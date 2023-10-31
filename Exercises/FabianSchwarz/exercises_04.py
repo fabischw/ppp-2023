@@ -65,7 +65,7 @@ def split_digits(n:int, base=10):
 
     Return Values:
     --------------
-    function:                           function to split ints into digits
+    list/set/tuple of digits
 
     #! the digits this returns are in descending order !
     """
@@ -78,14 +78,24 @@ def split_digits(n:int, base=10):
 
 
 class processor:
+    """
+    Class for the 'processor' / turing machine
+    """
 
     def __init__(self, memory:list):
         self.__memory = memory#store the memory
 
     def write_data(self,tasks:list):
-        """Write data to the memory
-        Args:
-        tasks: list of tuples with the first tuple value being the data and the second value being the address
+        """
+        Write tuples of both data and destination to the computer's memory
+
+        Parameters:
+        --------------
+        tasks(list of tuples of ints):      list of tuples of ints that provide both data and adress (DATA,ADRESS_INDEX)
+
+        Return Values:
+        --------------
+        None
         """
         for task_tuple in tasks:
             try:
@@ -97,11 +107,11 @@ class processor:
 
     def read_data(self,tasks:list):
         """
-        Add to values(given by index) and write it(via the write function)
+        Read data at indexes given by the input list
 
         Parameters:
         --------------
-        tasks:                              list of ints that indicate indexes which should be read
+        tasks(list of ints):                list of ints that indicate indexes which should be read
 
         Return Values:
         --------------
@@ -125,8 +135,8 @@ class processor:
         Parameters:
         --------------
         current_position(int):              current position in memory
-        param1_idx:                         index where the first value can be found
-        param2_idx:                         index where the second value can be found
+        param1_idx(int):                    index where the first value can be found
+        param2_idx(int):                    index where the second value can be found
         destination_idx(int):               index where the result should be written to
 
         Return Values:
@@ -147,8 +157,8 @@ class processor:
         Parameters:
         --------------
         current_position(int):              current position in memory
-        param1_idx:                         index where the first value can be found
-        param2_idx:                         index where the second value can be found
+        param1_idx(int):                    index where the first value can be found
+        param2_idx(int):                    index where the second value can be found
         destination_idx(int):               index where the result should be written to
 
         Return Values:
@@ -249,8 +259,8 @@ class processor:
         Parameters:
         --------------
         current_position(int):              current position in memory
-        param1_idx:                         index where the first value can be found
-        param2_idx:                         index where the second value can be found
+        param1_idx(int):                    index where the first value can be found
+        param2_idx(int):                    index where the second value can be found
         destination_idx(int):               index where the data should be written to
 
         Return Values:
@@ -266,14 +276,14 @@ class processor:
 
     def opcode_equals(self, current_position:int, param1_idx:int, param2_idx: int, destination_idx:int):
         """
-        Add to values(given by index) and write it(via the write function)
+        Write 1 to destination index if given input params are the same, otherwise write value 0
 
         Parameters:
         --------------
         current_position(int):              current position in memory
-        param1_idx:                         index where the first value can be found
-        param2_idx:                         index where the second value can be found
-        destination:                        index where the result should be written to
+        param1_idx(int):                    index where the first value can be found
+        param2_idx(int):                    index where the second value can be found
+        destination(int):                   index where the result should be written to
 
         Return Values:
         --------------
@@ -294,6 +304,9 @@ class processor:
 
 
 def compute(memory):
+    """
+    run the program
+    """
     compute_instance = processor(memory)
 
 
@@ -353,16 +366,6 @@ def compute(memory):
                 idx_arr.append(memory[curr_pos+idx+1])
         #executing the opcode
         curr_pos = opcode_function(curr_pos, *idx_arr)
-
-
-
-
-
-
-
-
-
-
 
 
 compute(commands)
