@@ -147,13 +147,11 @@ def get_filestructure(path_to_terminal_log:pathlib.Path) -> dict[str, dict]:
                     else:
                         file_ending = file_ending.replace(".","")
 
-                    file_name += file_ending
 
                     curr_dict[file_name] = (int(file_size_str),file_ending)#save current file as tuple of filesize and file ending
 
 
-
-                    path_str = "/".join(curr_path)[1:]
+                    path_str = "/".join(curr_path)[1:]#convert current path array to a string
                     curr_dir_size = dir_sizes_dict.get(path_str)
                     curr_dir_size = 0 if not curr_dir_size else curr_dir_size
                     dir_sizes_dict[path_str] = curr_dir_size + int(file_size_str)#TODO: remove second type cast and cast into a int just once
@@ -161,17 +159,11 @@ def get_filestructure(path_to_terminal_log:pathlib.Path) -> dict[str, dict]:
                     #go back and add the current file size to the parent directories
                     if path_str.count("/") > 1:
                         #get recursive path array
-                        progressive_path = [path_str[:i].rstrip('/') for i in range(1, len(path_str) + 1) if path_str[i - 1] == '/' or i == len(path_str)][1:]
+                        progressive_path = [path_str[:i].rstrip('/') for i in range(1, len(path_str) + 1) if path_str[i - 1] == '/' or i == len(path_str)][1:-1]
                         for path in progressive_path:
-                            curr_dir_size = dir_sizes_dict.get(path)
-                            curr_dir_size = 0 if not curr_dir_size else curr_dir_size
-                            dir_sizes_dict[path] = curr_dir_size + int(file_size_str)
-                            #dir_sizes_dict[path] = curr_dir_size + int(file_size_str)
-
-
-
-
-
+                            curr_dir_size = dir_sizes_dict.get(path)#get the current parent size (WITHOUT the current file size)
+                            curr_dir_size = 0 if not curr_dir_size else curr_dir_size#if the value is not present, set value 0
+                            dir_sizes_dict[path] = curr_dir_size + int(file_size_str)#re-assign new value
 
 
 
@@ -200,13 +192,6 @@ def recursive_size(inpt_dict:dict) -> int:
 
 
 
-def generate_dir_size_dict_inefficient(file_structure: dict[str,dict]) -> dict[str, int]:
-    pass
-
-
-
-
-
 
 def task1_get_max_dir_sizes(dir_sizes_dict:dict[str, int], max_size:int):
     total_size = 0
@@ -215,7 +200,6 @@ def task1_get_max_dir_sizes(dir_sizes_dict:dict[str, int], max_size:int):
     #test edge case root dir is smaller than the limit
     if dir_sizes_dict["/"] < max_size: return dir_sizes_dict["/"]
 
-    dir_sizes_dict.pop("/")#remove / as it is not needed anymore and makes the calculaion more complex
 
 
     for keys in dir_sizes_dict:#loop through keys in the dictionairy
@@ -225,10 +209,6 @@ def task1_get_max_dir_sizes(dir_sizes_dict:dict[str, int], max_size:int):
         if value < max_size:
             used_dicts.append(keys)
             total_size += value
-
-        #print(f"key={keys}, value={value}, progressive_path={progressive_path}")
-
-
 
     return total_size
 
@@ -240,14 +220,11 @@ def task1_get_max_dir_sizes(dir_sizes_dict:dict[str, int], max_size:int):
 
 
 exercise_log_path = data_dir / "terminal_record.txt"
-#exercise_log_path = data_dir / "example.txt"
 exercises_file_structure = get_filestructure(exercise_log_path)
-
-#print(exercises_file_structure[1])
+filesize_dict = exercises_file_structure[1]
+file_system = exercises_file_structure[0]
 MAX_SIZE = 100000
-print(task1_get_max_dir_sizes(exercises_file_structure[1],MAX_SIZE))#prints 1016787, should be:1778099
-#print(exercises_file_structure[0])
-#print(exercises_file_structure)
+print(task1_get_max_dir_sizes(filesize_dict,MAX_SIZE))#1778099
 
 
 # PART 2:
@@ -278,10 +255,11 @@ print(task1_get_max_dir_sizes(exercises_file_structure[1],MAX_SIZE))#prints 1016
 
 
 
-def make_space(filesize:int, dir_sizes: dict[str, int]):
+def make_space(file_system: dict[str, dict],filesize:int, dir_sizes: dict[str, int]):
     """
+    Calculate which directory to delete to make space for a file that might not fit in the current state of the file system
     """
-    used_space = None#get total size of file system used#TODO: get the used space
+    used_space = recursive_size(file_system)#get total size of file system used
     fs_space = 70000000
     free_space = fs_space - used_space
     required_space = filesize - free_space#get the amount of space that has to be freed
@@ -294,3 +272,4 @@ def make_space(filesize:int, dir_sizes: dict[str, int]):
     return smallest_path
 
 
+print(make_space(file_system,30000000, filesize_dict))#('/pcqjnl/lrrl/nwjggvr/bwmglvmt', 1623571)
