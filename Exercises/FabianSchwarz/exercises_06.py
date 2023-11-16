@@ -72,8 +72,168 @@
 # directory considered is at most 100000, and mention the result in your PR.
 # For the example above the two directories meeting the size requirement are `a` and `e`, while `/` and `d` are too large.
 # The sum of the size of a and e would be 95437.
-#
-#
+
+import pathlib
+
+
+
+
+
+here = pathlib.Path(__file__).parent
+exercises_dir = here.parent
+root_dir = exercises_dir.parent
+data_dir = root_dir / "data"
+
+
+
+
+
+
+
+
+
+
+def get_to_path(inpt_path:list[str], file_structure:dict[dict]) -> dict[dict]:
+    """
+    Goes to a specified path and returns a dict of the file structure starting there
+    """
+    curr_dict = file_structure
+    for elements in inpt_path:
+        curr_dict = curr_dict[elements]
+
+    return curr_dict
+
+
+
+
+
+def get_filestructure(path_to_terminal_log:pathlib.Path) -> dict[dict]:
+    """
+    get the filestructure (nested dictionairy) using a 'terminal log'
+    """
+    central_dict = {"/": {}}
+
+    curr_path = []
+    dir_sizes_dict = {}
+
+
+    with open(path_to_terminal_log, "r") as file:
+        for lines in file:
+            curr_line = lines.rstrip()#remove \n
+            command_mode = curr_line.startswith("$ ")
+            content = curr_line[command_mode*2:]#get the current content
+            command = curr_line[2:] if command_mode else None
+            #TODO: add condition to skip run if command is ls
+
+            if command and command.startswith("cd"):#command is a cd command
+                destination = command[3:]
+
+                #update current path
+                if destination == "..":
+                    curr_path.pop()
+                else:
+                    curr_path.append(destination)
+            elif not command:#no command -> add files to structure
+                curr_dict = get_to_path(curr_path, central_dict)#TODO: 'cache' current directory instead of re-generating it every time
+                
+                if content.startswith("dir"):#create sub-directory
+                    dirname = content[4:]
+                    curr_dict[dirname] = {}
+                else:#create file
+                    # interpret files as tuples of filetype[technically unnecessary but nice to have] and file size
+                    file_size_str, file_name = content.split(" ")
+                    file_ending = file_name[file_name.find("."):]
+
+
+                    #save file ending
+                    if not file_ending.startswith("."):
+                        file_ending = ""
+                    else:
+                        file_ending = file_ending.replace(".","")
+
+                    file_name += file_ending
+
+                    curr_dict[file_name] = (int(file_size_str),file_ending)#save current file as tuple of filesize and file ending
+
+
+
+                    path_str = "/".join(curr_path)[1:]
+                    curr_dir_size = dir_sizes_dict.get(path_str)
+                    curr_dir_size = 0 if not curr_dir_size else curr_dir_size
+                    dir_sizes_dict[path_str] = curr_dir_size + int(file_size_str)#TODO: remove second type cast and cast into a int just once
+
+    dir_sizes_dict["/"] = dir_sizes_dict.pop("")
+    return (central_dict, dir_sizes_dict)#TODO write wrapper function that only returns the dict as the task states only the dict should be returned.
+
+
+
+def recursive_size(inpt_dict:dict) -> int:
+    """
+    Calculate the total size of a directory recursivly
+    """
+    if inpt_dict =={}:
+        return 0
+    
+    #loop through items in the dict:
+    dict_size = 0
+    for _ ,items in inpt_dict.items():
+        if type(items) == dict:
+            if items != {}:
+                dict_size += recursive_size(items)
+        else:
+            dict_size += items[0]
+
+    return dict_size
+
+
+
+
+def task1_get_max_dir_sizes(dir_sizes_dict:dict, max_size:int):
+    total_size = 0
+    used_dicts = []#save the high-level dicts that have been used
+
+    #test edge case root dir is smaller than the limit
+    if dir_sizes_dict["/"] < max_size: return dir_sizes_dict["/"]
+
+    dir_sizes_dict.pop("/")#remove / as it is not needed anymore and makes the calculaion more complex
+
+
+    for keys in sorted(dir_sizes_dict, key=lambda key: key.count("/")):#loop through keys in the dictionairy
+        
+        value = dir_sizes_dict[keys]
+
+        #get progressive path
+        #Example: keys = '/a/e/x' -> ['/a', '/a/e', '/a/e/x']
+        progressive_path = [keys[:i].rstrip('/') for i in range(1, len(keys) + 1) if keys[i - 1] == '/' or i == len(keys)][1:]
+        for paths in progressive_path:
+            if paths in used_dicts:
+                continue
+
+        if value < max_size:
+            used_dicts.append(keys)
+            total_size += value
+
+        #print(f"key={keys}, value={value}, progressive_path={progressive_path}")
+
+
+
+    return total_size
+
+
+
+
+
+
+
+
+exercise_log_path = data_dir / "terminal_record.txt"
+#exercise_log_path = data_dir / "example.txt"
+exercises_file_structure = get_filestructure(exercise_log_path)
+
+print(task1_get_max_dir_sizes(exercises_file_structure[1],100000))
+#print(exercises_file_structure)
+
+
 # PART 2:
 # In part 2 you need to identify a single directory to delete (including all sub-directories of course).
 # The total space available to the filesystem is 70000000, and you need to make enough room to fit a file of 
@@ -97,3 +257,4 @@
 # 
 # You can find the /actual/ input to both parts in data/terminal_record.txt
 ###############################################################################
+#TODO task2
