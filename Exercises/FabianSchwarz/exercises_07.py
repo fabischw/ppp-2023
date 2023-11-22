@@ -78,8 +78,12 @@
 
 from int_computer import IntComputer
 import pathlib
-#import asciimatics
-import matplotlib as plt
+import asciimatics
+import time
+from asciimatics.screen import Screen
+from asciimatics.effects import Cycle, Stars
+from asciimatics.renderers import FigletText
+from asciimatics.scene import Scene
 
 
 here = pathlib.Path(__file__).parent
@@ -94,23 +98,115 @@ with open(data_dir / "breakout_commands.txt","r") as file:
 
 commands =[int(char.rstrip("\n"))for char in data]
 
-def input_getter():
-    value = input('please enter the next value:')
-    return int(value)
+
+
+COLOUR_BLACK = 0
+COLOUR_RED = 1
+COLOUR_GREEN = 2
+COLOUR_YELLOW = 3
+COLOUR_BLUE = 4
+COLOUR_MAGENTA = 5
+COLOUR_CYAN = 6
+COLOUR_WHITE = 7
+
+
+A_BOLD = 1
+A_NORMAL = 2
+A_REVERSE = 3
+A_UNDERLINE = 4
 
 
 
-class TripletSplitter:
+FPS = 2
+
+
+class Game:
+    pixel_encoding = {
+        0: ("",COLOUR_WHITE),
+        1: ("#", COLOUR_WHITE),
+        2: ("=", COLOUR_BLUE),
+        3: ("-", COLOUR_GREEN),
+        4: ("O", COLOUR_RED)
+    }
     def __init__(self):
-        triplet_incr_counter = 0
-        triplet_arr = []
+        self.usr_inputs = 0
+        self.score = 0
+        self.triplet_arr = []
+        self.pixel_dict = {}
+        self.screen = None
+
+
+    def score_display(self, screen):
+        score_str = f"YOUR  SCORE   IS  : {self.score}"
+        effects = [
+            Cycle(
+                screen,
+                FigletText("Breakout", font='big'),
+                int(screen.height / 2 - 8)),
+            Cycle(
+                screen,
+                FigletText(score_str, font='big'),
+                int(screen.height / 2 + 3)),
+            Stars(screen, 200)
+        ]
+        screen.play([Scene(effects, 500)])
+
+
+
+
+    def render(self,screen:Screen):
+        self.screen = screen
+        for key, item in self.pixel_dict.items():
+            xy_pos = key.split("_")
+            #Print Pixel: 1st argument: char to print, 2nd argument: x position, 3rd argument: y position, 4th argument: color
+            screen.print_at(item[0],int(xy_pos[0]),int(xy_pos[1]),item[1])#print the pixel
+
+        screen.refresh()
+        time.sleep(1/FPS)#sleep for 
+
+
 
     def split_triplets(self, inpt:int):
         self.triplet_arr.append(inpt)
-        print("im alive")
-        if self.triplet_incr_counter == 3:
-            #full triplet
-            pass
+        if len(self.triplet_arr) == 3:
+            #full triplet -> draw screen
+
+            if self.triplet_arr[0] == -1:#score update
+                self.score += self.triplet_arr[2]#update the score
+            else:
+
+                #check if a pixel with the same index0 and 1 is already present
+                
+                dict_key = str(self.triplet_arr[0]) + "_" + str(self.triplet_arr[1])
+
+                self.pixel_dict[dict_key] = Game.pixel_encoding[self.triplet_arr[2]]
+
+            self.triplet_arr = []
+
+
+
+    def input_getter(self):
+        self.usr_inputs += 1
+        #get input, draw new screen
+        
+        Screen.wrapper(self.render)
+        key = self.screen.get_event()
+        if not key:
+            return 0
+        key = key.key_code
+        print(key)
+        if key == 97:
+            return -1
+        elif key == 100:
+            return 1
+        else:
+            return 0
+        
+
+
+
+
+
 
 
 
@@ -122,9 +218,18 @@ class no_bloat_output:
 
 
 
+def task2():
+    game = Game()
+
+    computer = IntComputer(game.input_getter, game.split_triplets)
+    commands[0] = 2
+    response = computer.run(commands)
+    Screen.wrapper(game.score_display)
 
 
-splitter = TripletSplitter()
 
-computer = IntComputer(input_getter, splitter.split_triplets)
-response = computer.run(commands)
+
+
+
+if __name__ == "__main__":
+    task2()
