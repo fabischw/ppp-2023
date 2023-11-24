@@ -195,11 +195,11 @@ class Game:
             return 0
         key = key.key_code
         print(key)
-        if key == 97:
+        if key == 97:#A pressed -> move left
             return -1
-        elif key == 100:
+        elif key == 100:#D pressed -> move right
             return 1
-        else:
+        else:#don't move the padle if no valid key was pressed
             return 0
         
 
@@ -208,17 +208,20 @@ class Game:
 
 
 
+def task1():
+    #only print the game without starting it
+    game = Game()
 
-
-class no_bloat_output:
-    """
-    fancy terminal output for the game that has 0% bloat
-    """
-    pass
+    computer = IntComputer(game.input_getter, game.split_triplets)
+    response = computer.run(commands)
+    Screen.wrapper(game.score_display)
 
 
 
 def task2():
+    """
+    Start game in playable mode (Controls: A for left, D for right, no key pressed -> don't move peedle)
+    """
     game = Game()
 
     computer = IntComputer(game.input_getter, game.split_triplets)
@@ -232,4 +235,5 @@ def task2():
 
 
 if __name__ == "__main__":
-    task2()
+    task1()#first executre task 1
+    task2()#start interactive game
